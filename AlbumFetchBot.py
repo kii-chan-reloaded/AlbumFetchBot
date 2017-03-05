@@ -242,12 +242,12 @@ def checkMessages():
         if message.subject == "Edit autofetch":
             print("Edit requested.")
             parts = re.search("Artist: (.*?)\n\nSong: (.*)",message.body)
-            if not (parts.group(1) or parts.group(2)):
-                message.reply("Please enter both an artist and a song name.")
-                message.mark_read()
-                print("Incorrect formatting. Skipping.")
-                continue
             try:
+                if not (parts.group(1) or parts.group(2)):
+                    message.reply("Please enter both an artist and a song name.")
+                    message.mark_read()
+                    print("Incorrect formatting. Skipping.")
+                    continue
                 newComment = createText(R.submission(id=post.submission.id),parts.group(1),parts.group(2)).replace("__POSTID__",postID)
                 post.edit(newComment)
                 print("Edit success")
@@ -341,7 +341,7 @@ S = spotipy.Spotify()
 # Define bot flair. This will need to be edited before/immediately after submitting to get the correct postID in the links.
 botFlair =("\n****\n\n[^(Edit this)](https://www.reddit.com/message/compose/?to="+creds["R"]["u"]+"&subject=Edit%20autofetch&message=__POSTID__%0A%0AArtist%3A%20%0A%0ASong%3A%20) ^| "
            "[^(Delete this)](https://www.reddit.com/message/compose/?to="+creds["R"]["u"]+"&subject=Delete%20autofetch&message=__POSTID__) ^| "
-           "[^(I am a bot)](https://github.com/WolfgangAxel/AlbumFetchBot)")
+           "[^(I am a bot)](https://github.com/WolfgangAxel/AlbumFetchBot) ^| ^(Bugs or features?) [^Github](https://github.com/WolfgangAxel/AlbumFetchBot/issues)")
 
 print("Bot successfully loaded. Entering main loop.")
 
