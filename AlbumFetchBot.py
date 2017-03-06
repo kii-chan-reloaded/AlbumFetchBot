@@ -239,18 +239,18 @@ try:
 except:
     exit("Environment variables not set. Variables are:\n"
          "Reddit:\n"
-         "  RUSER\n"
-         "  RPASS\n"
-         "  RCLID\n"
-         "  RSCRT\n"
+         "  RUSER - Bot's reddit username\n"
+         "  RPASS - Bot's reddit password\n"
+         "  RCLID - Bot's reddit client-id\n"
+         "  RSCRT - Bot's reddit secret\n"
          "Discogs:\n"
-         "  DTOKN\n"
+         "  DTOKN - Bot's discogs user_token\n"
          "Misc:\n"
-         "  MYSUB\n"
-         "  MASTR\n"
-         "  SLPTM")
+         "  MYSUB - Subreddit to monitor\n"
+         "  MASTR - Your personal reddit account\n"
+         "  SLPTM - Time to sleep between refreshes")
 
-# testing
+# Was for testing, keeping it as it's good feedback
 print("Credentials read as:")
 for thing in creds:
     for more in creds[thing]:
