@@ -185,7 +185,7 @@ def checkSubreddit(sub):
         # pull some really old posts as "new" after a while.
         if time.time() - submission.created_utc > 24*60*60:
             continue
-        title = re.search("(.*?) - (.*)",submission.title)
+        title = re.search("(.*?) - (.*)( [[(].*[\])])*",submission.title)
         try:
             artist = title.group(1)
             song = title.group(2)
