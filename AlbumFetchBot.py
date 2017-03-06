@@ -28,97 +28,6 @@
 #                                                                      #
 ########################################################################
 
-#### Startup
-
-def loadCreds(myPath):
-    """
-    loads the config file, if anything is empty, cause panic
-    """
-    config = configparser.RawConfigParser()
-    config.optionxform = lambda option: option
-    config.read(myPath+"credentials.ini")
-    if not config.sections():
-        raise Exception
-    for item in config.sections():
-        if not [thing[1] for thing in config[item].items()]:
-            raise Exception
-    return config
-
-def makeCreds(myPath):
-    """
-    Walks user through creation of credentials.ini
-    """
-    print("Either this is the first time this script is being run, or there "
-          "was an error reading the config file. You will now be walked "
-          "through obtaining all the credentials this bot needs in order "
-          "to function.")
-    config = configparser.ConfigParser()
-    config.optionxform = lambda option: option
-    print("We will first get the bot's Reddit information.")
-    input("Press enter to continue... ")
-    ############################################################# Reddit
-    print(" 1) Go to https://www.reddit.com/prefs/apps and sign in with your "
-          "bot account.\n"
-          " 2) Press the 'create app' button, then enter the following :\n\n"
-          "    Name: AlbumFetchBot (or another name if you so wish)\n"
-          "    App type: script\n"
-          "    description: (leave this blank or enter whatever you wish)\n"
-          "    about url: https://github.com/WolfgangAxel/AlbumFetchBot\n"
-          "    redirect url: http://127.0.0.1:65010/authorize_callback\n\n"
-          " 3) Finally, press the 'create app' button.")
-    input("Press enter to continue... ")
-    print("Underneath the name of the app, there should be a string of letters and numbers.\n"
-          "That is the bot's client-id.\n"
-          "The bot's secret is displayed in the table.")
-    redCreds = {}
-    for short,thing in [["u","username"],["p","password"],["c","client-id"],["s","secret"]]:
-        while True:
-            value = input("Please enter the bot's "+thing+":\n==> ")
-            confirm = input("Is '"+value+"' correct? (y/n)\n==> ")
-            if confirm.lower() == "y":
-                redCreds[short] = value
-                break
-            print("Confirmation failed. Restarting entry")
-    ############################################################### Discogs
-    print("Next, we will get the bot's Discog information")
-    input("Press enter to continue... ")
-    print(" 1) Go to https://www.discogs.com/settings/developers and sign in "
-          "with the account you want the bot to search Discogs with.\n"
-          " 2) Press the 'Generate Token' button")
-    disCreds = {}
-    while True:
-        token = input("Paste the user token here:\n==> ")
-        confirm = input("Is '"+token+"' correct? (y/n)\n==> ")
-        if confirm.lower() == "y":
-            disCreds["token"] = token
-            break
-        print("Confirmation failed. Restarting entry")
-    ############################################################### Misc
-    print("Almost done! Just a few more items to define.")
-    input("Press enter to continue... ")
-    mscCreds = {}
-    for variable,question in [ ["mySub","Enter the name of your subreddit."],
-                               ["botMaster","Enter your personal Reddit username. (This is used for Reddit's user-agent, nothing more)"],
-                               ["sleepTime","How many seconds to wait between refreshing? (Use whole numbers like 300 or expressions like 5 * 60)"]
-                             ]:
-        while True:
-            value = input(question+"\n==>")
-            confirm = input("Is '"+value+"' correct? (y/n)\n==> ")
-            if confirm.lower() == "y":
-                mscCreds[variable] = value
-                break
-            print("Confirmation failed. Restarting entry.")
-    
-    config["R"] = redCreds
-    config["D"] = disCreds
-    config["M"] = mscCreds
-    with open(myPath+"credentials.ini","w") as cfg:
-        config.write(cfg)
-    print("Config file written successfully!")
-    return config
-
-#### Utility
-
 def searchDiscogs(artist,song):
     """
     Return the url for what we assume is the album.
@@ -303,10 +212,8 @@ def checkSubreddit(sub):
 #                                                                      #
 ########################################################################
 
-myPath = __file__.replace("AlbumFetchBot.py","")
-
 try:
-    mods = ["praw","configparser","time","re","discogs_client","itunespy","spotipy"]
+    mods = ["praw","os","time","re","discogs_client","itunespy","spotipy"]
     for mod in mods:
         print("Importing "+mod)
         exec("import "+mod)
@@ -314,10 +221,34 @@ except:
     exit(mod+" was not found. Install "+mod+" with pip to continue.")
 
 try:
-    creds = loadCreds(myPath)
-    print("Credentials loaded from file.")
+    creds = {}
+    ###############
+    creds["R"] = {}
+    creds["R"]["u"] = os.environ.get("RUSER")
+    creds["R"]["p"] = os.environ.get("RPASS")
+    creds["R"]["c"] = os.environ.get("RCLID")
+    creds["R"]["s"] = os.environ.get("RSCRT")
+    ###############
+    creds["D"] = {}
+    creds["D"]["token"] = os.environ.get("DTOKN")
+    ###############
+    creds["M"] = {}
+    creds["M"]["mySub"] = os.environ.get("MYSUB")
+    creds["M"]["botMaster"] = os.environ.get("MASTR")
+    creds["M"]["sleepTime"] = os.environ.get("SLPTM")
 except:
-    creds = makeCreds(myPath)
+    exit("Environment variables not set. Variables are:\n"
+         "Reddit:\n"
+         "  RUSER\n"
+         "  RPASS\n"
+         "  RCLID\n"
+         "  RSCRT\n"
+         "Discogs:\n"
+         "  DTOKN\n"
+         "Misc:\n"
+         "  MYSUB\n"
+         "  MASTR\n"
+         "  SLPTM")
 
 # Normalize the reddit credentials
 for variable in creds["M"]:
