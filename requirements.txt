@@ -1,4 +1,0 @@
-praw
-discogs_client
-itunespy
-spotipy
