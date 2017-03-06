@@ -185,7 +185,7 @@ def checkSubreddit(sub):
         # pull some really old posts as "new" after a while.
         if time.time() - submission.created_utc > 24*60*60:
             continue
-        title = re.search("(.*?) - (.*)( [[(].*[\])])*",submission.title)
+        title = re.search("(.*?) - (.*)",submission.title)
         try:
             artist = title.group(1)
             song = title.group(2)
@@ -200,9 +200,9 @@ def checkSubreddit(sub):
         except:
             comment =("Failed to find song information for:\n\n* Artist: "+artist+"\n* Song: "+song+"\n\n"+
                       "Use the links below to edit this post with the correct information or to delete this comment."+botFlair)
-        #C = submission.reply(comment)
-        #C.edit(C.body.replace("__POSTID__",C.id))
-        #submission.hide() # Prevents the bot from replying to posts it already replied to
+        C = submission.reply(comment)
+        C.edit(C.body.replace("__POSTID__",C.id))
+        submission.hide() # Prevents the bot from replying to posts it already replied to
         print("Replied with:\n"+comment)
         
 
@@ -290,7 +290,7 @@ print("Bot successfully loaded. Entering main loop.")
 
 while True:
     try:
-        #checkMessages()
+        checkMessages()
         checkSubreddit(creds["M"]["mySub"])
         time.sleep(eval(creds["M"]["sleepTime"]))
     except Exception as e:
