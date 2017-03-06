@@ -194,6 +194,7 @@ def checkSubreddit(sub):
                   "  song: "+song)
         except:
             print("Submission '"+submission.title+"' failed to match song title conventions. Skipping")
+            submission.hide()
             continue
         try:
             comment = createText(submission,artist,song)
@@ -232,6 +233,10 @@ try:
     creds["D"] = {}
     creds["D"]["token"] = os.environ.get("DTOKN")
     ###############
+    creds["S"] = {}
+    creds["S"]["c"] = os.environ.get("SCLID")
+    creds["S"]["s"] = os.environ.get("SSCRT")
+    ###############
     creds["M"] = {}
     creds["M"]["mySub"] = os.environ.get("MYSUB")
     creds["M"]["botMaster"] = os.environ.get("MASTR")
@@ -245,6 +250,9 @@ except:
          "  RSCRT - Bot's reddit secret\n"
          "Discogs:\n"
          "  DTOKN - Bot's discogs user_token\n"
+         "Spotify\n"
+         "  SCLID - Bot's Spotify client-id\n"
+         "  SSCRT - Bot's Spotify secret\n"
          "Misc:\n"
          "  MYSUB - Subreddit to monitor\n"
          "  MASTR - Your personal reddit account\n"
@@ -273,7 +281,9 @@ D = discogs_client.Client("AlbumFetchBot, finding music for /r/"+creds["M"]["myS
                 user_token = creds["D"]["token"])
 
 # Initialize Spotify instance
-S = spotipy.Spotify()
+from spotipy.oauth2 import SpotifyClientCredentials
+client_credentials_manager = SpotifyClientCredentials(client_id=creds["S"]["c"],client_secret=creds["S"]["s"])
+S = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 # Define bot flair. This will need to be edited before/immediately after submitting to get the correct postID in the links.
 botFlair =("\n****\n\n[^(Edit this)](https://www.reddit.com/message/compose/?to="+creds["R"]["u"]+"&subject=Edit%20autofetch&message=__POSTID__%0A%0AArtist%3A%20%0A%0ASong%3A%20) ^| "
