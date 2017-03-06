@@ -250,6 +250,12 @@ except:
          "  MASTR\n"
          "  SLPTM")
 
+# testing
+print("Credentials read as:")
+for thing in creds:
+    for more in creds[thing]:
+        print(" ",thing,"|",more,"|",creds[thing][more])
+
 # Normalize the reddit credentials
 for variable in creds["M"]:
     creds["M"][variable] = creds["M"][variable].replace("/r/","").replace("r/","").replace("/u/","").replace("u/","")
