@@ -1,1 +1,1 @@
-web: python3 AlbumFetchBot.py
+worker: python3 AlbumFetchBot.py
