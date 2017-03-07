@@ -23,6 +23,9 @@ Copy/save `AlbumFetchBot.py` to your server/computer, then run the script as nor
  * owner's username (used for Reddit's user-agent)
 * Discogs
  * user token
+* Spotify
+ * client ID
+ * secret
 * Misc
  * Refresh rate
 
