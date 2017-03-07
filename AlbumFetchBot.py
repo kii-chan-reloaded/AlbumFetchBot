@@ -284,6 +284,33 @@ def checkMessages():
         print("Message reply sent.")
         message.mark_read()
 
+def titleParse(subTitle):
+    """
+    Check submission title for correct form. Raise exception if not in
+    suggested format, return title without [OPTIONAL TEXT]
+    """
+    title = re.search("(.*?) - (.*)",subTitle)
+    artist = title.group(1)
+    song = title.group(2)
+    optionalText = re.search(r"[[].*[\]]",song)
+    # Remove all instances of "[.*]" from song 
+    while True:
+        try:
+            song = song.replace(optionalText.group(),"")
+            optionalText = re.search(r"[[].*[\]]",song)
+        except:
+            break
+    # remove trailing whitespace from song
+    while True:
+        if song[-1] == " ":
+            song = song[:-1]
+        else:
+            break
+    print("Read '"+subTitle+"' with the following information:\n"
+          "  artist: "+artist+"\n"
+          "  song: "+song)
+    return artist,song
+
 def checkSubreddit(sub):
     """
     Check the new submissions to the subreddit, comment accordingly
@@ -294,13 +321,8 @@ def checkSubreddit(sub):
         # pull some really old posts as "new" after a while.
         if time.time() - submission.created_utc > 24*60*60:
             continue
-        title = re.search("(.*?) - (.*)",submission.title)
         try:
-            artist = title.group(1)
-            song = title.group(2)
-            print("Read '"+submission.title+"' with the following information:\n"
-                  "  artist: "+artist+"\n"
-                  "  song: "+song)
+            artist,song = titleParse(submission.title)
         except:
             print("Submission '"+submission.title+"' failed to match song title conventions. Skipping")
             submission.hide()
@@ -313,8 +335,7 @@ def checkSubreddit(sub):
         C = submission.reply(comment)
         C.edit(C.body.replace("__POSTID__",C.id))
         submission.hide() # Prevents the bot from replying to posts it already replied to
-        print("Replied with:\n"+comment)
-        
+        print("Replied with:\n"+comment+"\n\n********\n")
 
 ########################################################################
 #                                                                      #
