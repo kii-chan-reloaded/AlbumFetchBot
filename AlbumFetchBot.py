@@ -79,11 +79,11 @@ def makeCreds(myPath):
                 redCreds[short] = value
                 break
             print("Confirmation failed. Restarting entry")
-    ############################################################### Discogs
+    ############################################################ Discogs
     print("Next, we will get the bot's Discog information")
     input("Press enter to continue... ")
     print(" 1) Go to https://www.discogs.com/settings/developers and sign in "
-          "with the account you want the bot to search Discogs with.\n"
+          "with the bot's account.\n"
           " 2) Press the 'Generate Token' button")
     disCreds = {}
     while True:
@@ -93,6 +93,23 @@ def makeCreds(myPath):
             disCreds["token"] = token
             break
         print("Confirmation failed. Restarting entry")
+    ############################################################ Spotify
+    print("Next, we will get the bot's Spotify information")
+    input("Press enter to continue... ")
+    print(" 1) Go to https://developer.spotify.com/my-applications/#!/ "
+          "and sign in with the bot's account.\n"
+          " 2) Press 'Create an App', then fill out the form as you wish.\n"
+          " 3) Submit the form. The resulting page will have the bot's \n"
+          "client-id and secret listed about halfway through the page.")
+    sptCreds = {}
+    for short, thing in [["c","client-id"],["s","secret"]]:
+        while True:
+            value = input("Please enter the bot's "+thing+":\n==> ")
+            confirm = input("Is '"+value+"' correct? (y/n)\n==> ")
+            if confirm.lower() == "y":
+                sptCreds[short] = value
+                break
+            print("Confirmation failed. Restarting entry")
     ############################################################### Misc
     print("Almost done! Just a few more items to define.")
     input("Press enter to continue... ")
@@ -111,6 +128,7 @@ def makeCreds(myPath):
     
     config["R"] = redCreds
     config["D"] = disCreds
+    config["S"] = sptCreds
     config["M"] = mscCreds
     with open(myPath+"credentials.ini","w") as cfg:
         config.write(cfg)
@@ -285,15 +303,16 @@ def checkSubreddit(sub):
                   "  song: "+song)
         except:
             print("Submission '"+submission.title+"' failed to match song title conventions. Skipping")
+            submission.hide()
             continue
         try:
             comment = createText(submission,artist,song)
         except:
             comment =("Failed to find song information for:\n\n* Artist: "+artist+"\n* Song: "+song+"\n\n"+
                       "Use the links below to edit this post with the correct information or to delete this comment."+botFlair)
-        C = submission.reply(comment)
-        C.edit(C.body.replace("__POSTID__",C.id))
-        submission.hide() # Prevents the bot from replying to posts it already replied to
+        #C = submission.reply(comment)
+        #C.edit(C.body.replace("__POSTID__",C.id))
+        #submission.hide() # Prevents the bot from replying to posts it already replied to
         print("Replied with:\n"+comment)
         
 
@@ -336,7 +355,9 @@ D = discogs_client.Client("AlbumFetchBot, finding music for /r/"+creds["M"]["myS
                 user_token = creds["D"]["token"])
 
 # Initialize Spotify instance
-S = spotipy.Spotify()
+from spotipy.oauth2 import SpotifyClientCredentials
+client_credentials_manager = SpotifyClientCredentials(client_id=creds["S"]["c"],client_secret=creds["S"]["s"])
+S = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
 # Define bot flair. This will need to be edited before/immediately after submitting to get the correct postID in the links.
 botFlair =("\n****\n\n[^(Edit this)](https://www.reddit.com/message/compose/?to="+creds["R"]["u"]+"&subject=Edit%20autofetch&message=__POSTID__%0A%0AArtist%3A%20%0A%0ASong%3A%20) ^| "
@@ -353,7 +374,7 @@ print("Bot successfully loaded. Entering main loop.")
 
 while True:
     try:
-        checkMessages()
+        #checkMessages()
         checkSubreddit(creds["M"]["mySub"])
         time.sleep(eval(creds["M"]["sleepTime"]))
     except Exception as e:
